@@ -1,0 +1,8 @@
+[package]
+name = "num_to_text"
+version = "0.1.0"
+authors = ["Ivan Temchenko <35359595i@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+regex = "1"
