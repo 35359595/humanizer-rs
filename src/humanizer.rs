@@ -6,10 +6,6 @@ const TENS: &'static [&str] = &["zero", "ten", "twenty", "thirty", "forty", "fif
 const UNIONS: &'static [&str] = &["dummy", "hundred", "thousand", "million"];
 
 pub fn convert_into_text(input: usize) -> String {
-    if input < 0usize
-    {
-        return "zero".into();
-    }
     if input < 20usize
     {
         return DIGITS[input].into();
@@ -35,8 +31,7 @@ pub fn convert_into_text(input: usize) -> String {
                                 1 => final_suffix = "",
                                 _ => final_suffix = UNIONS[index]
                             }
-                            let data = format!("{} {}", DIGITS[hundred], UNIONS[1]);
-                            words.push(data);
+                            words.push(format!("{} {}", DIGITS[hundred], UNIONS[1]));
                         }
                     },
                     7 | 4
@@ -55,15 +50,24 @@ pub fn convert_into_text(input: usize) -> String {
                     },
                     8 | 5 | 2
                     => {
-                        let after_pop_len = digit_string.len() - 2;
                         let current: usize = digit_string.pop_first_as_usize();
                         let next : usize = digit_string.pop_first_as_usize();
-                        let union = "";
                         if current.eq(&1)
                         {
+                            // If 10..19
                             let index_union = usize::from_str(&format!("{}{}", current.to_string(), next.to_string())).unwrap_or(0);
-                            let data = DIGITS[index_union];
-                            words.push(data.to_owned());
+                            words.push(DIGITS[index_union].to_owned());
+                            // Adding union if needed
+                            let union = match digit_string.len() {
+                                6 => UNIONS[3],
+                                3 => UNIONS[2],
+                                1 => UNIONS[1],
+                                _ => ""
+                            };
+                            if !union.eq("")
+                            {
+                                words.push(union.to_owned());
+                            }
                             continue;
                         }
                         if next.eq(&0)
@@ -75,7 +79,7 @@ pub fn convert_into_text(input: usize) -> String {
                             words.push(TENS[current].to_owned());
                             continue;
                         }
-                        let union = match after_pop_len
+                        let union = match digit_string.len()
                             {
                                 6 => UNIONS[3],
                                 3 => UNIONS[2],
@@ -84,8 +88,14 @@ pub fn convert_into_text(input: usize) -> String {
                             };
                         let suffix = format!("-{}",DIGITS[next]);
                         let prefix = TENS[current];
-                        let data = format!("{}{} {}", prefix, suffix, final_suffix);
-                        words.push(data);
+
+                        if final_suffix.eq(""){
+                            words.push(format!("{}{} {}", prefix, suffix, union));
+                        }
+                        else
+                        {
+                            words.push(format!("{}{} {}", prefix, suffix, final_suffix));
+                        }
                     },
                     _ => panic!("number is too big!!!")
                 }
